@@ -1,0 +1,38 @@
+﻿@page "/"
+
+<PageTitle>Home</PageTitle>
+
+<h1>Hello, world!</h1>
+
+<p>
+    Using model to make single prediction -- Comparing actual Fare_amount with predicted Fare_amount from sample data...
+</p>
+
+<TelerikForm Model="sampleData" OnValidSubmit="SubmitForm">
+    <FormValidation>
+        <DataAnnotationsValidator />
+    </FormValidation>
+</TelerikForm>
+
+<p>Taxi Fare Amount: @predictionResult?.Score</p>
+
+@code {
+    MLModel.TripModelOutput? predictionResult;
+
+
+    // Create single instance of sample data from first line of dataset for model input
+    MLModel.TripModelInput sampleData = new()
+        {
+            VendorId = @"CMT",
+            RateCode = 1F,
+            PassengerCount = 1F,
+            TripDistance = 1.5F,
+            PaymentType = @"CRD",
+        };
+
+    void SubmitForm()
+    {
+        predictionResult = MLModel.Predict(sampleData);
+    }
+
+}
