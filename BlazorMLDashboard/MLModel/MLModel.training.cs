@@ -15,7 +15,10 @@ namespace BlazorMLDashboard
 {
     public partial class MLModel
     {
-        public const string RetrainFilePath =  @"C:\Users\edcha\source\repos\BlazorMLDashboard\BlazorMLDashboard\wwwroot\Data\taxi-fare-train.csv";
+        public const string RetrainFilePath = @"C:\Users\echarben\Source\Repos\EdCharbeneau\BlazorMLDashboard\BlazorMLDashboard\wwwroot\Data\taxi-fare-train.csv";
+        public const string EvaluationFilePath = @"C:\Users\echarben\Source\Repos\EdCharbeneau\BlazorMLDashboard\BlazorMLDashboard\wwwroot\Data\taxi-fare-test.csv";
+        public const string OutputPath = @"C:\Users\echarben\Source\Repos\EdCharbeneau\BlazorMLDashboard\BlazorMLDashboard\MLModel\MLModel.mlnet";
+        public const string StatsPath = @"C:\Users\echarben\Source\Repos\EdCharbeneau\BlazorMLDashboard\BlazorMLDashboard\wwwroot\Data\";
         public const char RetrainSeparatorChar = ',';
         public const bool RetrainHasHeader =  true;
         public const bool RetrainAllowQuoting =  false;
@@ -27,7 +30,7 @@ namespace BlazorMLDashboard
         /// <param name="inputDataFilePath">Path to the data file for training.</param>
         /// <param name="separatorChar">Separator character for delimited training file.</param>
         /// <param name="hasHeader">Boolean if training file has a header.</param>
-        public static void Train(string outputModelPath, string inputDataFilePath = RetrainFilePath, char separatorChar = RetrainSeparatorChar, bool hasHeader = RetrainHasHeader, bool allowQuoting = RetrainAllowQuoting)
+        public static void Train(string outputModelPath = OutputPath, string inputDataFilePath = RetrainFilePath, char separatorChar = RetrainSeparatorChar, bool hasHeader = RetrainHasHeader, bool allowQuoting = RetrainAllowQuoting)
         {
             var mlContext = new MLContext();
 

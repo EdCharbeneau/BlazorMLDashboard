@@ -7,11 +7,27 @@ using System.Collections.Generic;
 using System.Linq;
 using Plotly.NET;
 using Plotly.NET.LayoutObjects;
+using System.Text.Json;
+using Telerik.SvgIcons;
 
 namespace BlazorMLDashboard
 {
     public partial class MLModel
     {
+        public static void Evaluate()
+        {
+            var mlContext = new MLContext();
+            IDataView testData = LoadIDataViewFromFile(mlContext, EvaluationFilePath, RetrainSeparatorChar, RetrainHasHeader, RetrainAllowQuoting);
+            ITransformer trainedModel = mlContext.Model.Load(MLNetModelPath, out var _);
+            var preprocessedTrainData = trainedModel.Transform(testData);
+            using (FileStream stream = new FileStream(Path.Combine(StatsPath, "preprocessedTrainData.csv"), FileMode.Create))
+                mlContext.Data.SaveAsText(preprocessedTrainData, stream, RetrainSeparatorChar, true, false, false);
+            //var pfi = CalculatePFI(mlContext, preprocessedTrainData, trainedModel, @"fare_amount");
+            //var text = System.Text.Json.JsonSerializer.Serialize(pfi);
+            //System.IO.File.WriteAllText(Path.Combine(StatsPath, "pmi.json"),text);
+            System.IO.File.WriteAllText(Path.Combine(StatsPath, "analysis.json"), CalculateOverallStats(mlContext, preprocessedTrainData));
+        }
+        
         /// <summary>
         /// Permutation feature importance (PFI) is a technique to determine the importance 
         /// of features in a trained machine learning model. PFI works by taking a labeled dataset, 
@@ -30,9 +46,8 @@ namespace BlazorMLDashboard
         /// <param name="model">Model to evaluate.</param>
         /// <param name="labelColumnName">Label column being predicted.</param>
         /// <returns>A list of each feature and its importance.</returns>
-        public static List<Tuple<string, double>> CalculatePFI(MLContext mlContext, IDataView trainData, ITransformer model, string labelColumnName)
+        public static List<Tuple<string, double>> CalculatePFI(MLContext mlContext, IDataView preprocessedTrainData, ITransformer model, string labelColumnName)
         {
-            var preprocessedTrainData = model.Transform(trainData);
 
             var permutationFeatureImportance =
          mlContext.Regression
@@ -56,6 +71,21 @@ namespace BlazorMLDashboard
             return featurePFI;
         }
 
+        public static string CalculateOverallStats(MLContext mlContext, IDataView preprocessedTrainData)
+        {
+            var data = mlContext.Data
+                   .CreateEnumerable<TestDataPoint>(preprocessedTrainData, false)
+                   .Take(1000);
+            TestDataResults result = new TestDataResults(data);
+            var metrics = mlContext.Regression.Evaluate(preprocessedTrainData, "fare_amount", "Score");
+
+            // Save to JSON
+            result.RSquared = metrics.RSquared;
+            result.RootMeansSquaredError = metrics.RootMeanSquaredError;
+            result.MeanSquaredError = metrics.MeanSquaredError;
+            result.MeanAbsoluteError = metrics.MeanAbsoluteError;
+            return System.Text.Json.JsonSerializer.Serialize(result, new JsonSerializerOptions(JsonSerializerDefaults.Web));
+        }
         /// <summary>
         /// R Squared is a measure of variation between the values predicted by the model and the true values. 
         /// In a "perfect" model, there would be no variation between predictions and true values. 
@@ -69,56 +99,56 @@ namespace BlazorMLDashboard
         /// <param name="model">Model used for predictions.</param>
         /// <param name="labelColumnName">Name of the predicted label column.</param>
         /// <param name="folderPath">Folder path to save the RegressionChart.html file into.</param>
-        public static void PlotRSquaredValues(IDataView trainData, ITransformer model, string labelColumnName, string folderPath)
-        {
-            // Number of rows to display in charts.
-            int numberOfRows = 1000;
-            // Use the model to make batch predictions on training data
-            var testResults = model.Transform(trainData);
+        //public static void PlotRSquaredValues(IDataView trainData, ITransformer model, string labelColumnName, string folderPath)
+        //{
+        //    // Number of rows to display in charts.
+        //    int numberOfRows = 1000;
+        //    // Use the model to make batch predictions on training data
+        //    var testResults = model.Transform(trainData);
 
-            // Get the actual values from the dataset
-            var trueValues = testResults.GetColumn<float>(labelColumnName).Take(numberOfRows); ;
+        //    // Get the actual values from the dataset
+        //    var trueValues = testResults.GetColumn<float>(labelColumnName).Take(numberOfRows); ;
 
-            // Get the predicted values from the test results
-            var predictedValues = testResults.GetColumn<float>("Score").Take(numberOfRows);
+        //    // Get the predicted values from the test results
+        //    var predictedValues = testResults.GetColumn<float>("Score").Take(numberOfRows);
 
-            // Setup what the graph looks like
-            var title = Title.init(Text: "R-Squared Plot");
-            var layout = Layout.init<IConvertible>(Title: title, PlotBGColor: Plotly.NET.Color.fromString("#e5ecf6"));
-            var xAxis = LinearAxis.init<IConvertible, IConvertible, IConvertible, IConvertible, IConvertible, IConvertible>(
-                    Title: Title.init("True Values"),
-                    ZeroLineColor: Plotly.NET.Color.fromString("#ffff"),
-                    GridColor: Plotly.NET.Color.fromString("#ffff"),
-                    ZeroLineWidth: 2);
-            var yAxis = LinearAxis.init<IConvertible, IConvertible, IConvertible, IConvertible, IConvertible, IConvertible>(
-                    Title: Title.init("Predicted Values"),
-                    ZeroLineColor: Plotly.NET.Color.fromString("#ffff"),
-                    GridColor: Plotly.NET.Color.fromString("#ffff"),
-                    ZeroLineWidth: 2);
+        //    // Setup what the graph looks like
+        //    var title = Title.init(Text: "R-Squared Plot");
+        //    var layout = Layout.init<IConvertible>(Title: title, PlotBGColor: Plotly.NET.Color.fromString("#e5ecf6"));
+        //    var xAxis = LinearAxis.init<IConvertible, IConvertible, IConvertible, IConvertible, IConvertible, IConvertible>(
+        //            Title: Title.init("True Values"),
+        //            ZeroLineColor: Plotly.NET.Color.fromString("#ffff"),
+        //            GridColor: Plotly.NET.Color.fromString("#ffff"),
+        //            ZeroLineWidth: 2);
+        //    var yAxis = LinearAxis.init<IConvertible, IConvertible, IConvertible, IConvertible, IConvertible, IConvertible>(
+        //            Title: Title.init("Predicted Values"),
+        //            ZeroLineColor: Plotly.NET.Color.fromString("#ffff"),
+        //            GridColor: Plotly.NET.Color.fromString("#ffff"),
+        //            ZeroLineWidth: 2);
 
-            // We will plot the line that shows the perfect result. Setup that line here.
-            var maximumValue = Math.Max(trueValues.Max(), predictedValues.Max());
-            var perfectX = new[] { 0, maximumValue };
-            var perfectY = new[] { 0, maximumValue };
+        //    // We will plot the line that shows the perfect result. Setup that line here.
+        //    var maximumValue = Math.Max(trueValues.Max(), predictedValues.Max());
+        //    var perfectX = new[] { 0, maximumValue };
+        //    var perfectY = new[] { 0, maximumValue };
 
 
 
-            // Create the scatterplot that shows the true values vs the predicted values
-            var trueAndPredictedValues = Chart2D.Chart.Scatter<float, float, string>(x: trueValues, y: predictedValues, mode: StyleParam.Mode.Markers)
-                            .WithLayout(layout)
-                            .WithXAxis(xAxis)
-                            .WithYAxis(yAxis);
+        //    // Create the scatterplot that shows the true values vs the predicted values
+        //    var trueAndPredictedValues = Chart2D.Chart.Scatter<float, float, string>(x: trueValues, y: predictedValues, mode: StyleParam.Mode.Markers)
+        //                    .WithLayout(layout)
+        //                    .WithXAxis(xAxis)
+        //                    .WithYAxis(yAxis);
 
-            // Setup the line that shows what a perfect prediction would look like
-            var perfectLineGraph = Chart2D.Chart.Line<float, float, string>(x: perfectX, y: perfectY)
-                            .WithLayout(layout)
-                            .WithLine(Line.init(Width: 1.5));
+        //    // Setup the line that shows what a perfect prediction would look like
+        //    var perfectLineGraph = Chart2D.Chart.Line<float, float, string>(x: perfectX, y: perfectY)
+        //                    .WithLayout(layout)
+        //                    .WithLine(Line.init(Width: 1.5));
 
-            var chartWithValuesAndIdealLine = Chart.Combine(new[] { trueAndPredictedValues, perfectLineGraph });
-            var chartFilePath = folderPath + "\\RegressionChart.html";
+        //    var chartWithValuesAndIdealLine = Chart.Combine(new[] { trueAndPredictedValues, perfectLineGraph });
+        //    var chartFilePath = folderPath + "\\RegressionChart.html";
 
-            chartWithValuesAndIdealLine.SaveHtml(chartFilePath);
-        }
+        //    chartWithValuesAndIdealLine.SaveHtml(chartFilePath);
+        //}
     }
 }
 
