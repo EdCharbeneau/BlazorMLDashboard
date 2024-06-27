@@ -140,15 +140,14 @@ namespace BlazorMLDashboard
             }
         }
 
-        private static string MLNetModelPath = System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "MLModel/MLModel.mlnet");
-
-        public static readonly Lazy<PredictionEngine<TripModelInput, TripModelOutput>> PredictEngine = new Lazy<PredictionEngine<TripModelInput, TripModelOutput>>(() => CreatePredictEngine(), true);
+        public Lazy<PredictionEngine<TripModelInput, TripModelOutput>> PredictEngine => new Lazy<PredictionEngine<TripModelInput, TripModelOutput>>(() => CreatePredictEngine(), true);
 
 
-        private static PredictionEngine<TripModelInput, TripModelOutput> CreatePredictEngine()
+        private PredictionEngine<TripModelInput, TripModelOutput> CreatePredictEngine()
         {
             var mlContext = new MLContext();
-            ITransformer mlModel = mlContext.Model.Load(MLNetModelPath, out var _);
+            ModelSettings settings = options.Value;
+            ITransformer mlModel = mlContext.Model.Load(settings.GetPrivatePath(settings.ModelFileName), out var _);
             return mlContext.Model.CreatePredictionEngine<TripModelInput, TripModelOutput>(mlModel);
         }
 
@@ -157,7 +156,7 @@ namespace BlazorMLDashboard
         /// </summary>
         /// <param name="input">model input.</param>
         /// <returns><seealso cref=" TripModelOutput"/></returns>
-        public static TripModelOutput Predict(TripModelInput input)
+        public TripModelOutput Predict(TripModelInput input)
         {
             var predEngine = PredictEngine.Value;
             return predEngine.Predict(input);

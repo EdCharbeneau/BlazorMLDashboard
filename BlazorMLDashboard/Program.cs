@@ -1,12 +1,18 @@
+using BlazorMLDashboard;
 using BlazorMLDashboard.Components;
+using Microsoft.Extensions.Configuration;
+using System.Runtime;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddTelerikBlazor();
+
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.Configure<MySettings>(builder.Configuration.GetSection("MySettings"));
+builder.Services.Configure<ModelSettings>(builder.Configuration.GetSection("ModelSettings"));
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

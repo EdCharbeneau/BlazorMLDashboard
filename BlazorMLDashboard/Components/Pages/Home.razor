@@ -1,4 +1,6 @@
 ﻿@page "/"
+@using Microsoft.Extensions.Options
+@inject IOptions<ModelSettings> options
 
 <PageTitle>Home</PageTitle>
 
@@ -32,7 +34,7 @@
 
     void SubmitForm()
     {
-        predictionResult = MLModel.Predict(sampleData);
+       predictionResult = new MLModel(options).Predict(sampleData);
     }
 
 }

@@ -2,6 +2,10 @@
 @using System.Text.Json
 @using static BlazorMLDashboard.MLModel
 @using BlazorMLDashboard.Components.Pages.DataExplorer
+@using Microsoft.Extensions.Options
+@inject IOptions<ModelSettings> options
+@inject IConfiguration config
+
 <PageTitle>Retrain</PageTitle>
 @if (testResults != null)
 {
@@ -31,18 +35,20 @@
             <li class="list-group-item">MSE: <span class="data">@testResults.MeanSquaredError.ToString("#.###")</span></li>
             <li class="list-group-item">R<sup>2</sup>: <span class="data">@testResults.RSquared.ToString("P")</span></li>
         </ul>
-    <SpreadsheetView FilePath="@Path.Combine(StatsPath, "preprocessedTrainData.csv")">
+    <SpreadsheetView FilePath="@settings.GetPublicPath(settings.PreprocessedTrainDataFileName)">
 
         </SpreadsheetView>
 }
 <button class="btn btn-primary" @onclick="IncrementCount">Retrain Model</button>
 
 @code {
+    private ModelSettings settings => options.Value;
 
     private async Task IncrementCount()
     {
-        //MLModel.Train();
-        MLModel.Evaluate();
+        var model = new MLModel(options);
+        model.Train();
+        model.Evaluate();
         await Load();
     }
 
@@ -55,7 +61,7 @@
 
     private async Task Load()
     {
-        string path = Path.Combine(Environment.CurrentDirectory, "wwwroot", "Data", "analysis.json");
+        string path = settings.GetPublicPath(settings.AnalysisFileName);
         if (System.IO.File.Exists(path))
         {
             string json = await System.IO.File.ReadAllTextAsync(path);

@@ -10,33 +10,28 @@ using Microsoft.ML.Data;
 using Microsoft.ML.Trainers;
 using Microsoft.ML.Trainers.LightGbm;
 using Microsoft.ML.Transforms;
+using Microsoft.Extensions.Options;
 
 namespace BlazorMLDashboard
 {
-    public partial class MLModel
+    public partial class MLModel(IOptions<ModelSettings> options)
     {
-        public const string RetrainFilePath = @"C:\Users\echarben\Source\Repos\EdCharbeneau\BlazorMLDashboard\BlazorMLDashboard\wwwroot\Data\taxi-fare-train.csv";
-        public const string EvaluationFilePath = @"C:\Users\echarben\Source\Repos\EdCharbeneau\BlazorMLDashboard\BlazorMLDashboard\wwwroot\Data\taxi-fare-test.csv";
-        public const string OutputPath = @"C:\Users\echarben\Source\Repos\EdCharbeneau\BlazorMLDashboard\BlazorMLDashboard\MLModel\MLModel.mlnet";
-        public const string StatsPath = @"C:\Users\echarben\Source\Repos\EdCharbeneau\BlazorMLDashboard\BlazorMLDashboard\wwwroot\Data\";
-        public const char RetrainSeparatorChar = ',';
-        public const bool RetrainHasHeader =  true;
-        public const bool RetrainAllowQuoting =  false;
 
-         /// <summary>
+        /// <summary>
         /// Train a new model with the provided dataset.
         /// </summary>
         /// <param name="outputModelPath">File path for saving the model. Should be similar to "C:\YourPath\ModelName.mlnet"</param>
         /// <param name="inputDataFilePath">Path to the data file for training.</param>
         /// <param name="separatorChar">Separator character for delimited training file.</param>
         /// <param name="hasHeader">Boolean if training file has a header.</param>
-        public static void Train(string outputModelPath = OutputPath, string inputDataFilePath = RetrainFilePath, char separatorChar = RetrainSeparatorChar, bool hasHeader = RetrainHasHeader, bool allowQuoting = RetrainAllowQuoting)
+        public void Train()
         {
             var mlContext = new MLContext();
+            ModelSettings settings = options.Value;
 
-            var data = LoadIDataViewFromFile(mlContext, inputDataFilePath, separatorChar, hasHeader, allowQuoting);
+            var data = LoadIDataViewFromFile(mlContext, settings);
             var model = RetrainModel(mlContext, data);
-            SaveModel(mlContext, model, data, outputModelPath);
+            SaveModel(mlContext, model, data, settings.GetPrivatePath(settings.ModelFileName));
         }
 
         /// <summary>
@@ -47,10 +42,8 @@ namespace BlazorMLDashboard
         /// <param name="separatorChar">Separator character for delimited training file.</param>
         /// <param name="hasHeader">Boolean if training file has a header.</param>
         /// <returns>IDataView with loaded training data.</returns>
-        public static IDataView LoadIDataViewFromFile(MLContext mlContext, string inputDataFilePath, char separatorChar, bool hasHeader, bool allowQuoting)
-        {
-            return mlContext.Data.LoadFromTextFile<TripModelInput>(inputDataFilePath, separatorChar, hasHeader, allowQuoting: allowQuoting);
-        }
+        public IDataView LoadIDataViewFromFile(MLContext mlContext, ModelSettings s) => 
+            mlContext.Data.LoadFromTextFile<TripModelInput>(s.GetPublicPath(s.RetrainFileName), s.RetrainSeparatorChar, s.RetrainHasHeader, allowQuoting: s.RetrainAllowQuoting);
 
 
         /// <summary>
@@ -60,7 +53,7 @@ namespace BlazorMLDashboard
         /// <param name="model">Model to save.</param>
         /// <param name="data">IDataView used to train the model.</param>
         /// <param name="modelSavePath">File path for saving the model. Should be similar to "C:\YourPath\ModelName.mlnet.</param>
-        public static void SaveModel(MLContext mlContext, ITransformer model, IDataView data, string modelSavePath)
+        public void SaveModel(MLContext mlContext, ITransformer model, IDataView data, string modelSavePath)
         {
             // Pull the data schema from the IDataView used for training the model
             DataViewSchema dataViewSchema = data.Schema;
@@ -78,7 +71,7 @@ namespace BlazorMLDashboard
         /// <param name="mlContext"></param>
         /// <param name="trainData"></param>
         /// <returns></returns>
-        public static ITransformer RetrainModel(MLContext mlContext, IDataView trainData)
+        public ITransformer RetrainModel(MLContext mlContext, IDataView trainData)
         {
             var pipeline = BuildPipeline(mlContext);
             var model = pipeline.Fit(trainData);
@@ -91,7 +84,7 @@ namespace BlazorMLDashboard
         /// </summary>
         /// <param name="mlContext"></param>
         /// <returns></returns>
-        public static IEstimator<ITransformer> BuildPipeline(MLContext mlContext)
+        public IEstimator<ITransformer> BuildPipeline(MLContext mlContext)
         {
             // Data process configuration with pipeline data transformations
             var pipeline = mlContext.Transforms.Categorical.OneHotEncoding(new []{new InputOutputColumnPair(@"vendor_id", @"vendor_id"),new InputOutputColumnPair(@"payment_type", @"payment_type")}, outputKind: OneHotEncodingEstimator.OutputKind.Indicator)      

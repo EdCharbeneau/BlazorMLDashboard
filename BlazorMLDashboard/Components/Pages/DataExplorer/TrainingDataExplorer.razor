@@ -1,5 +1,10 @@
 ﻿@page "/view-training-data"
-
+@using Microsoft.Extensions.Options
+@inject IOptions<ModelSettings> options
 <h3>Training Data Explorer</h3>
 
-<SpreadsheetView FilePath="@MLModel.RetrainFilePath"/>
+<SpreadsheetView FilePath="@settings.GetPublicPath(settings.RetrainFileName)"/>
+
+@code {
+    private ModelSettings settings => options.Value;
+}
