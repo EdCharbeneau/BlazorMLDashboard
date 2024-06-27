@@ -140,6 +140,9 @@ namespace BlazorMLDashboard
             }
         }
 
+        private ModelSettings Settings => options.Value;
+        public bool IsModelCreated => System.IO.File.Exists(Settings.GetPrivatePath(Settings.ModelFileName));
+
         public Lazy<PredictionEngine<TripModelInput, TripModelOutput>> PredictEngine => new Lazy<PredictionEngine<TripModelInput, TripModelOutput>>(() => CreatePredictEngine(), true);
 
 

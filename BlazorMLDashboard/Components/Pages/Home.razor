@@ -10,17 +10,29 @@
     Using model to make single prediction -- Comparing actual Fare_amount with predicted Fare_amount from sample data...
 </p>
 
-<TelerikForm Model="sampleData" OnValidSubmit="SubmitForm">
-    <FormValidation>
-        <DataAnnotationsValidator />
-    </FormValidation>
-</TelerikForm>
+@if (isModelCreated)
+{
+    <TelerikForm Model="sampleData" OnValidSubmit="SubmitForm">
+        <FormValidation>
+            <DataAnnotationsValidator />
+        </FormValidation>
+    </TelerikForm>
 
-<p>Taxi Fare Amount: @predictionResult?.Score</p>
+    <p>Taxi Fare Amount: @predictionResult?.Score</p>
+} else
+{
+    <p>The model requires <a href="/retrain">training</a> before predictions can be made.</p>
+}
 
 @code {
-    MLModel.TripModelOutput? predictionResult;
+    bool isModelCreated;
 
+    protected override void OnInitialized()
+    {
+        isModelCreated = new MLModel(options).IsModelCreated;
+    }
+
+    MLModel.TripModelOutput? predictionResult;
 
     // Create single instance of sample data from first line of dataset for model input
     MLModel.TripModelInput sampleData = new()
@@ -34,7 +46,7 @@
 
     void SubmitForm()
     {
-       predictionResult = new MLModel(options).Predict(sampleData);
+        predictionResult = new MLModel(options).Predict(sampleData);
     }
 
 }
