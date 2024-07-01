@@ -6,6 +6,7 @@ public class ModelSettings
     public required string ModelFileName { get; set; }
     public required string PreprocessedTrainDataFileName { get; set; }
     public required string AnalysisFileName { get; set; }
+    public required string PMIFileName { get; set; }
     public required string PublicPath { get; set; }
     public required string PrivatePath { get; set; }
     public char RetrainSeparatorChar { get; set; }

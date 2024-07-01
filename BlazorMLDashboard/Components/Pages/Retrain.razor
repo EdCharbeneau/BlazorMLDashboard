@@ -30,14 +30,14 @@
         </TelerikChart>
         <h3>Stats</h3>
         <ul class="list-group">
-            <li class="list-group-item"><span>RMSE: <span class="data">@testResults.RootMeansSquaredError.ToString("#.###")</span></span></li>
-            <li class="list-group-item">MAE: <span class="data">@testResults.MeanAbsoluteError.ToString("#.###")</span></li>
-            <li class="list-group-item">MSE: <span class="data">@testResults.MeanSquaredError.ToString("#.###")</span></li>
-            <li class="list-group-item">R<sup>2</sup>: <span class="data">@testResults.RSquared.ToString("P")</span></li>
+            <li class="list-group-item"><span>RMSE: <span class="data">@testResults.RegressionMetrics.RootMeansSquaredError.ToString("#.###")</span></span></li>
+        <li class="list-group-item">MAE: <span class="data">@testResults.RegressionMetrics.MeanAbsoluteError.ToString("#.###")</span></li>
+        <li class="list-group-item">MSE: <span class="data">@testResults.RegressionMetrics.MeanSquaredError.ToString("#.###")</span></li>
+        <li class="list-group-item">R<sup>2</sup>: <span class="data">@testResults.RegressionMetrics.RSquared.ToString("P")</span></li>
         </ul>
-    <SpreadsheetView FilePath="@settings.GetPublicPath(settings.PreprocessedTrainDataFileName)">
+  @*   <SpreadsheetView FilePath="@settings.GetPublicPath(settings.PreprocessedTrainDataFileName)">
 
-        </SpreadsheetView>
+        </SpreadsheetView> *@
 }
 <button class="btn btn-primary" @onclick="IncrementCount">Retrain Model</button>
 

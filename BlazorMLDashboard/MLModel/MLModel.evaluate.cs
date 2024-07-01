@@ -7,17 +7,37 @@ public partial class MLModel
 {
     public void Evaluate()
     {
-        var mlContext = new MLContext();
+        MLContext mlContext = new();
 
-        IDataView testData = LoadIDataViewFromFile(mlContext, Settings);
-        ITransformer trainedModel = mlContext.Model.Load(Settings.GetPrivatePath(Settings.ModelFileName), out var _);
-        var preprocessedTrainData = trainedModel.Transform(testData);
+        //Load Evaluation Data
+        IDataView testData = LoadIDataViewFromFile(mlContext, Settings.EvaluationFileName, Settings);
+
+        //Load the previously trained model under evaluation
+        ITransformer trainedModelUnderEval = mlContext.Model.Load(Settings.GetPrivatePath(Settings.ModelFileName), out var _);
+
+        //Using the trained model, evaluate the data set
+        IDataView preprocessedTrainData = ProcessAndSaveScores(mlContext, testData, trainedModelUnderEval);
+
+        CalculateAndSaveOverallStats(mlContext, trainedModelUnderEval, preprocessedTrainData);
+
+    }
+
+    private void CalculateAndSaveOverallStats(MLContext mlContext, ITransformer trainedModel, IDataView preprocessedTrainData)
+    {
+        TestDataResults analysisResults = CalculateOverallStats(mlContext, preprocessedTrainData);
+        analysisResults.PermutationFeatureImportance = CalculatePFI(mlContext, preprocessedTrainData, trainedModel, @"fare_amount");
+        string analysisResultsJson = JsonSerializer.Serialize(analysisResults, new JsonSerializerOptions(JsonSerializerDefaults.Web));
+        System.IO.File.WriteAllText(Settings.GetPublicPath(Settings.AnalysisFileName), analysisResultsJson);
+    }
+
+    private IDataView ProcessAndSaveScores(MLContext mlContext, IDataView testData, ITransformer trainedModelUnderEval)
+    {
+        var preprocessedTrainData = trainedModelUnderEval.Transform(testData);
+
+        //Save the processed data
         using (FileStream stream = new FileStream(Settings.GetPublicPath(Settings.PreprocessedTrainDataFileName), FileMode.Create))
             mlContext.Data.SaveAsText(preprocessedTrainData, stream, Settings.RetrainSeparatorChar, true, false, false);
-        //var pfi = CalculatePFI(mlContext, preprocessedTrainData, trainedModel, @"fare_amount");
-        //var text = System.Text.Json.JsonSerializer.Serialize(pfi);
-        //System.IO.File.WriteAllText(Path.Combine(StatsPath, "pmi.json"),text);
-        System.IO.File.WriteAllText(Settings.GetPublicPath(Settings.AnalysisFileName), CalculateOverallStats(mlContext, preprocessedTrainData));
+        return preprocessedTrainData;
     }
 
     /// <summary>
@@ -38,44 +58,50 @@ public partial class MLModel
     /// <param name="model">Model to evaluate.</param>
     /// <param name="labelColumnName">Label column being predicted.</param>
     /// <returns>A list of each feature and its importance.</returns>
-    public List<Tuple<string, double>> CalculatePFI(MLContext mlContext, IDataView preprocessedTrainData, ITransformer model, string labelColumnName)
+    public List<RegressionMetrics> CalculatePFI(MLContext mlContext, IDataView preprocessedTrainData, ITransformer model, string labelColumnName)
     {
 
         var permutationFeatureImportance =
-     mlContext.Regression
-     .PermutationFeatureImportance(
-             model,
-             preprocessedTrainData,
-             labelColumnName: labelColumnName);
+         mlContext.Regression
+            .PermutationFeatureImportance(
+                 model,
+                 preprocessedTrainData,
+                 labelColumnName: labelColumnName);
 
         var featureImportanceMetrics =
              permutationFeatureImportance
-             .Select((kvp) => new { kvp.Key, kvp.Value.RSquared })
-             .OrderByDescending(myFeatures => Math.Abs(myFeatures.RSquared.Mean));
+             .Select((kvp) => new { kvp.Key, kvp.Value })
+             .OrderByDescending(myFeatures => Math.Abs(myFeatures.Value.RSquared.Mean));
 
-        var featurePFI = new List<Tuple<string, double>>();
+        List<RegressionMetrics> featurePFI = new();
         foreach (var feature in featureImportanceMetrics)
         {
-            var pfiValue = Math.Abs(feature.RSquared.Mean);
-            featurePFI.Add(new Tuple<string, double>(feature.Key, pfiValue));
+            featurePFI.Add(new RegressionMetrics
+            {
+                Feature = feature.Key,
+                MeanAbsoluteError = feature.Value.MeanAbsoluteError.Mean,
+                MeanSquaredError = feature.Value.MeanSquaredError.Mean,
+                RootMeansSquaredError = feature.Value.RootMeanSquaredError.Mean,
+                RSquared = Math.Abs(feature.Value.RSquared.Mean)
+            });
         }
 
         return featurePFI;
     }
 
-    public string CalculateOverallStats(MLContext mlContext, IDataView preprocessedTrainData)
+    public TestDataResults CalculateOverallStats(MLContext mlContext, IDataView preprocessedTrainData)
     {
-        var data = mlContext.Data
+        IEnumerable<TestDataPoint> data = mlContext.Data
                .CreateEnumerable<TestDataPoint>(preprocessedTrainData, false)
                .Take(1000);
-        TestDataResults result = new TestDataResults(data);
-        var metrics = mlContext.Regression.Evaluate(preprocessedTrainData, "fare_amount", "Score");
 
-        // Save to JSON
-        result.RSquared = metrics.RSquared;
-        result.RootMeansSquaredError = metrics.RootMeanSquaredError;
-        result.MeanSquaredError = metrics.MeanSquaredError;
-        result.MeanAbsoluteError = metrics.MeanAbsoluteError;
-        return System.Text.Json.JsonSerializer.Serialize(result, new JsonSerializerOptions(JsonSerializerDefaults.Web));
+        TestDataResults result = new TestDataResults(data);
+        Microsoft.ML.Data.RegressionMetrics metrics = mlContext.Regression.Evaluate(preprocessedTrainData, @"fare_amount", "Score");
+
+        result.RegressionMetrics.RSquared = metrics.RSquared;
+        result.RegressionMetrics.RootMeansSquaredError = metrics.RootMeanSquaredError;
+        result.RegressionMetrics.MeanSquaredError = metrics.MeanSquaredError;
+        result.RegressionMetrics.MeanAbsoluteError = metrics.MeanAbsoluteError;
+        return result;
     }
 }

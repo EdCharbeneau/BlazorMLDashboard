@@ -7,10 +7,8 @@ public partial class MLModel
         public TestDataResults(IEnumerable<TestDataPoint> resultSet) => ResultSet = resultSet;
         public IEnumerable<TestDataPoint> ResultSet { get; set; } = [];
         public IEnumerable<DataPoint> MinimizedSquareError => GetMinimizedSquareError();
-        public double RSquared { get; set; }
-        public double RootMeansSquaredError { get; set; }
-        public double MeanSquaredError { get; set; }
-        public double MeanAbsoluteError { get; set; }
+        public RegressionMetrics RegressionMetrics { get; set; } = new();
+        public List<RegressionMetrics> PermutationFeatureImportance { get; set; }
 
         private IEnumerable<DataPoint> GetMinimizedSquareError()
         {
@@ -48,6 +46,15 @@ public partial class MLModel
             ////Function for Y1 in the line
             return (double x) => (mslope * x) + bintercept;
         }
+    }
+
+    public class RegressionMetrics
+    {
+        public string? Feature { get; set; }
+        public double RSquared { get; set; }
+        public double RootMeansSquaredError { get; set; }
+        public double MeanSquaredError { get; set; }
+        public double MeanAbsoluteError { get; set; }
     }
 }
 

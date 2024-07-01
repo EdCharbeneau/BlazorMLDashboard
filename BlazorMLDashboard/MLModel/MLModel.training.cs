@@ -15,7 +15,7 @@ public partial class MLModel
         MLContext mlContext = new();
         
         // Load Data
-        IDataView data = LoadIDataViewFromFile(mlContext, Settings);
+        IDataView data = LoadIDataViewFromFile(mlContext, Settings.RetrainFileName, Settings);
         
         // Transform Data
         // Train Model
