@@ -1,11 +1,11 @@
-﻿@using Telerik.Documents.Common
+﻿@using System.Text
+@using Telerik.Documents.Common
 @using Telerik.Documents.SpreadsheetStreaming
 @using Telerik.Windows.Documents.Spreadsheet.FormatProviders.OpenXml.Xlsx
 @using Telerik.Windows.Documents.Spreadsheet.FormatProviders.TextBased.Csv
 @using Telerik.Windows.Documents.Spreadsheet.Model
 
 <p>@message</p>
-<TelerikLoaderContainer Visible="@(wb is null)" />
 <TelerikSpreadsheet Data="xls" />
 
 @code {
@@ -13,16 +13,13 @@
     [Parameter, EditorRequired]
     public string? FilePath { get; set; }
 
-    Workbook? wb;
     byte[]? xls;
-    string message = "";
+    string message = "Previewing the first 1000 records";
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        wb = await GetWorkbookFromCsv();
-        wb.Worksheets[0].Rows.Remove(1000, wb.Worksheets[0].Rows.Count - 1000);
+        Workbook wb = GetWorkbookPreviewFromCsv();
         ConvertWorkbookToXls(wb);
-        message = "";
     }
 
     void ConvertWorkbookToXls(Workbook wb)
@@ -34,13 +31,12 @@
         };
     }
 
-    async Task<Workbook> GetWorkbookFromCsv()
+    private Workbook GetWorkbookPreviewFromCsv()
     {
         if (FilePath is null) throw new InvalidOperationException("FilePath parameter must be set.");
 
-        message = "Loading a large dataset this may take a moment...";
-        byte[] data = await System.IO.File.ReadAllBytesAsync(FilePath);
-
+        var dataString = System.IO.File.ReadLines(FilePath).Take(1000);
+        byte[] data = Encoding.UTF8.GetBytes(string.Join(Environment.NewLine, dataString));
         return new CsvFormatProvider().Import(new MemoryStream(data));
     }
 }
