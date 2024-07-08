@@ -3,32 +3,21 @@
 @using static BlazorMLDashboard.MLModel
 @using BlazorMLDashboard.Components.Pages.DataExplorer
 @using Microsoft.Extensions.Options
+@using BlazorMLDashboard.Components.Pages.Analysis
 @inject IOptions<ModelSettings> options
 @inject IConfiguration config
-
 <PageTitle>Retrain</PageTitle>
-@if (testResults != null)
+
+<RegressionChart TestResults="testResults"/>
+
+<PermutationFeatureImportanceChart PermutationFeatureImportance="@testResults?.PermutationFeatureImportance" />
+
+<h3>Stats</h3>
+https://www.datatechnotes.com/2019/02/regression-model-accuracy-mae-mse-rmse.html#google_vignette
+@if (testResults is not null)
 {
-    <TelerikChart Width="600px" Height="600px">
+<RSquaredGauge RSquared="testResults.RegressionMetrics.RSquared"/>
 
-        <ChartSeriesItems>
-
-            <ChartSeries Type="ChartSeriesType.ScatterLine" Data="@testResults.MinimizedSquareError"
-                         XField="@nameof(DataPoint.X)"
-                         YField="@nameof(DataPoint.Y)"
-                         Name="Minimized Square Error">
-            </ChartSeries>
-            <ChartSeries Type="ChartSeriesType.Scatter"
-                         Data="@testResults.ResultSet"
-                         XField="@nameof(TestDataPoint.Actual)"
-                         YField="@nameof(TestDataPoint.Predicted)">
-                <ChartSeriesMarkers Type="ChartSeriesMarkersType.Cross" Size="3"></ChartSeriesMarkers>
-            </ChartSeries>
-            <ChartLegend Position="Telerik.Blazor.ChartLegendPosition.Bottom">
-            </ChartLegend>
-        </ChartSeriesItems>
-    </TelerikChart>
-    <h3>Stats</h3>
     <ul class="list-group">
         <li class="list-group-item"><span>RMSE: <span class="data">@testResults.RegressionMetrics.RootMeansSquaredError.ToString("#.###")</span></span></li>
         <li class="list-group-item">MAE: <span class="data">@testResults.RegressionMetrics.MeanAbsoluteError.ToString("#.###")</span></li>
@@ -58,7 +47,7 @@
 
     private async Task Load()
     {
-        string path = settings.GetPublicPath(settings.AnalysisFileName);
+        string path = settings.GetPath(settings.AnalysisFileName);
         if (System.IO.File.Exists(path))
         {
             string json = await System.IO.File.ReadAllTextAsync(path);

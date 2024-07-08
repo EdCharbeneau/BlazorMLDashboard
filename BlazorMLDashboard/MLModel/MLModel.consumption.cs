@@ -60,7 +60,7 @@ public partial class MLModel
         [ColumnName(@"payment_type")]
         public float[]? PaymentType { get; set; }
 
-        [ColumnName(@"fareAmount")]
+        [ColumnName(@"fare_amount")]
         public float FareAmount { get; set; }
 
         [ColumnName(@"Features")]
@@ -74,14 +74,11 @@ public partial class MLModel
     #endregion
     public class TestDataPoint
     {
-        [ColumnName("fare_amount"), LoadColumn(6)]
+        [ColumnName("fare_amount")]
         public float Actual { get; set; }
         [ColumnName("Score")]
         public float Predicted { get; set; }
     }
-
-    private ModelSettings Settings => options.Value;
-    public bool IsModelCreated => System.IO.File.Exists(Settings.GetPrivatePath(Settings.ModelFileName));
 
     public Lazy<PredictionEngine<TripModelInput, TripModelOutput>> PredictEngine => new Lazy<PredictionEngine<TripModelInput, TripModelOutput>>(() => CreatePredictEngine(), true);
 
@@ -89,7 +86,7 @@ public partial class MLModel
     {
         var mlContext = new MLContext();
         ModelSettings settings = options.Value;
-        ITransformer mlModel = mlContext.Model.Load(settings.GetPrivatePath(settings.ModelFileName), out var _);
+        ITransformer mlModel = mlContext.Model.Load(settings.GetPath(settings.ModelFileName), out var _);
         return mlContext.Model.CreatePredictionEngine<TripModelInput, TripModelOutput>(mlModel);
     }
 

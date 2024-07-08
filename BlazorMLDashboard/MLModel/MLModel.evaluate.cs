@@ -13,7 +13,7 @@ public partial class MLModel
         IDataView testData = LoadIDataViewFromFile(mlContext, Settings.EvaluationFileName, Settings);
 
         //Load the previously trained model under evaluation
-        ITransformer trainedModelUnderEval = mlContext.Model.Load(Settings.GetPrivatePath(Settings.ModelFileName), out var _);
+        ITransformer trainedModelUnderEval = mlContext.Model.Load(Settings.GetPath(Settings.ModelFileName), out var _);
 
         //Using the trained model, evaluate the data set
         IDataView preprocessedTrainData = ProcessAndSaveScores(mlContext, testData, trainedModelUnderEval);
@@ -27,7 +27,7 @@ public partial class MLModel
         TestDataResults analysisResults = CalculateOverallStats(mlContext, preprocessedTrainData);
         analysisResults.PermutationFeatureImportance = CalculatePFI(mlContext, preprocessedTrainData, trainedModel, @"fare_amount");
         string analysisResultsJson = JsonSerializer.Serialize(analysisResults, new JsonSerializerOptions(JsonSerializerDefaults.Web));
-        System.IO.File.WriteAllText(Settings.GetPublicPath(Settings.AnalysisFileName), analysisResultsJson);
+        System.IO.File.WriteAllText(Settings.GetPath(Settings.AnalysisFileName), analysisResultsJson);
     }
 
     private IDataView ProcessAndSaveScores(MLContext mlContext, IDataView testData, ITransformer trainedModelUnderEval)
@@ -35,7 +35,7 @@ public partial class MLModel
         var preprocessedTrainData = trainedModelUnderEval.Transform(testData);
 
         //Save the processed data
-        using (FileStream stream = new FileStream(Settings.GetPublicPath(Settings.PreprocessedTrainDataFileName), FileMode.Create))
+        using (FileStream stream = new FileStream(Settings.GetPath(Settings.PreprocessedTrainDataFileName), FileMode.Create))
             mlContext.Data.SaveAsText(preprocessedTrainData, stream, Settings.RetrainSeparatorChar, true, false, false);
         return preprocessedTrainData;
     }
@@ -68,25 +68,17 @@ public partial class MLModel
                  preprocessedTrainData,
                  labelColumnName: labelColumnName);
 
-        var featureImportanceMetrics =
-             permutationFeatureImportance
-             .Select((kvp) => new { kvp.Key, kvp.Value })
-             .OrderByDescending(myFeatures => Math.Abs(myFeatures.Value.RSquared.Mean));
-
-        List<RegressionMetrics> featurePFI = new();
-        foreach (var feature in featureImportanceMetrics)
-        {
-            featurePFI.Add(new RegressionMetrics
-            {
-                Feature = feature.Key,
-                MeanAbsoluteError = feature.Value.MeanAbsoluteError.Mean,
-                MeanSquaredError = feature.Value.MeanSquaredError.Mean,
-                RootMeansSquaredError = feature.Value.RootMeanSquaredError.Mean,
-                RSquared = Math.Abs(feature.Value.RSquared.Mean)
-            });
-        }
-
-        return featurePFI;
+        return permutationFeatureImportance
+             //.Select((kvp) => new { kvp.Key, kvp.Value })
+             .OrderByDescending(myFeatures => Math.Abs(myFeatures.Value.RSquared.Mean))
+             .Select(feature => new RegressionMetrics
+             {
+                 Feature = feature.Key,
+                 MeanAbsoluteError = feature.Value.MeanAbsoluteError.Mean,
+                 MeanSquaredError = feature.Value.MeanSquaredError.Mean,
+                 RootMeansSquaredError = feature.Value.RootMeanSquaredError.Mean,
+                 RSquared = Math.Abs(feature.Value.RSquared.Mean)
+             }).ToList();
     }
 
     public TestDataResults CalculateOverallStats(MLContext mlContext, IDataView preprocessedTrainData)

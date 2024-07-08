@@ -8,7 +8,7 @@ public partial class MLModel
         public IEnumerable<TestDataPoint> ResultSet { get; set; } = [];
         public IEnumerable<DataPoint> MinimizedSquareError => GetMinimizedSquareError();
         public RegressionMetrics RegressionMetrics { get; set; } = new();
-        public List<RegressionMetrics> PermutationFeatureImportance { get; set; }
+        public List<RegressionMetrics>? PermutationFeatureImportance { get; set; }
 
         private IEnumerable<DataPoint> GetMinimizedSquareError()
         {
@@ -33,8 +33,6 @@ public partial class MLModel
 
             double meanXY = ResultSet.Average(r => r.Actual * r.Predicted);
             double meanXsquare = ResultSet.Average(r => r.Actual * r.Actual);
-
-            //double mslope = (meanXY - meanX * meanY) / meanXsquare - (meanX * meanX);
 
             double mslope = ((meanX * meanY) - meanXY) / ((meanX * meanX) - meanXsquare);
 

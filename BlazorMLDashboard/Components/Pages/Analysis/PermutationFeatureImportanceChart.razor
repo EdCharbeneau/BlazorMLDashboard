@@ -1,0 +1,22 @@
+﻿@using Microsoft.ML.Data
+<h3>PermutationFeatureImportance</h3>
+
+<TelerikChart Width="600px" Height="600px">
+    <ChartSeriesItems>
+        <ChartSeries Type="ChartSeriesType.Bar"
+                     Data="Top5"
+                     Field="@nameof(RegressionMetrics.RSquared)" />
+        <ChartCategoryAxes>
+            <ChartCategoryAxis Categories="@(Top5FeatureNames)" />
+        </ChartCategoryAxes>
+    </ChartSeriesItems>
+</TelerikChart>
+
+@code {
+    [Parameter]
+    public List<MLModel.RegressionMetrics>? PermutationFeatureImportance { get; set; }
+
+    private IEnumerable<MLModel.RegressionMetrics>? Top5 => PermutationFeatureImportance?.Take(5);
+
+    private string?[]? Top5FeatureNames => Top5?.Select(pfi => pfi.Feature).ToArray();
+}

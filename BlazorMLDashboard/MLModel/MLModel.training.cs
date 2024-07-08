@@ -22,7 +22,7 @@ public partial class MLModel
         ITransformer model = RetrainModel(mlContext, data);
         
         //Save Model
-        using var fs = File.Create(Settings.GetPrivatePath(Settings.ModelFileName));
+        using var fs = File.Create(Settings.GetPath(Settings.ModelFileName));
         mlContext.Model.Save(model, data.Schema, fs);
     }
 
