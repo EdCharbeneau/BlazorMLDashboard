@@ -1,0 +1,47 @@
+﻿@using Telerik.Blazor.Components.Drawer
+@inherits LayoutComponentBase
+<TelerikAppBar>
+    <AppBarSection>
+        <TelerikButton FillMode="flat" Icon="@SvgIcon.Menu" OnClick="ToggleDrawer"></TelerikButton>
+    </AppBarSection>
+    <AppBarSpacer Size="var(--kendo-spacing-1)" />
+    <AppBarSection>
+        <h1>ML Dashboard</h1>
+    </AppBarSection>
+</TelerikAppBar>
+    <TelerikRootComponent>
+        <TelerikDrawer @ref="@Drawer" 
+            @bind-Expanded="@Expanded" 
+            Data="Data" 
+            MiniMode="@true" 
+            Mode="@DrawerMode.Push" 
+            Class="drawer-content-full-height">
+            <DrawerContent>
+                <section id="drawerContent" class="k-p-4">
+                    @Body
+                </section>
+            </DrawerContent>
+        </TelerikDrawer>
+    </TelerikRootComponent>
+<div id="blazor-error-ui">
+    An unhandled error has occurred.
+    <a href="" class="reload">Reload</a>
+    <a class="dismiss">🗙</a>
+</div>
+
+@code {
+    public TelerikDrawer<DrawerItem> Drawer { get; set; } = default!; // set by component lifecycle
+    public bool Expanded { get; set; }
+    public IEnumerable<DrawerItem> Data { get; set; } =
+    new List<DrawerItem>
+                            {
+            new DrawerItem ("Home", SvgIcon.Home, "/" ),
+            new DrawerItem ("Train", SvgIcon.ArrowRotateCw, "/retrain" ),
+            new DrawerItem ("Analysis", SvgIcon.GaugeRadial, "/analysis" ),
+            new DrawerItem ("Evalutate", SvgIcon.Parameters, "/evaluate" ),
+                            };
+
+    public async Task ToggleDrawer() => await Drawer.ToggleAsync();
+
+    public record DrawerItem(string Text, ISvgIcon Icon, string Url);
+}

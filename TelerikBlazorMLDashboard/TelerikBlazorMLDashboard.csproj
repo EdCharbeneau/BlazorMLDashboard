@@ -1,0 +1,46 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <Content Remove="Components\DataAnalysis\LinearRegressionChart.razor" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Include="MLModel\Data\Input\taxi-fare-test.csv" />
+	  <Content Include="MLModel\Data\Input\taxi-fare-train.csv" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.ML" Version="3.0.1" />
+		<PackageReference Include="Microsoft.ML.FastTree" Version="3.0.1" />
+		<PackageReference Include="Microsoft.ML.LightGbm" Version="3.0.1" />
+		<PackageReference Include="Telerik.UI.for.Blazor" Version="6.0.2" />
+		<PackageReference Include="Telerik.Documents.Core" Version="2024.2.426" />
+		<PackageReference Include="Telerik.Documents.Spreadsheet" Version="2024.2.426" />
+		<PackageReference Include="Telerik.Documents.Spreadsheet.FormatProviders.OpenXml" Version="2024.2.426" />
+		<PackageReference Include="Telerik.Zip" Version="2024.2.426" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Update="appsettings.Development.json">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+	  </Content>
+	  <Content Update="appsettings.json">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+	  </Content>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="MLModel\Data\TrainedModel\" />
+	</ItemGroup>
+
+</Project>

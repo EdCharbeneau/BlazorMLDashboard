@@ -1,0 +1,86 @@
+﻿@page "/analysis"
+@using BlazorMLDashboard
+@using System.Text.Json
+@using TelerikBlazorMLDashboard.Components.DataAnalysis
+@using static BlazorMLDashboard.MLModel
+@inject MLModel model
+
+<h3>Analysis</h3>
+
+@if (!model.IsModelCreated)
+{
+    <p>The model must be <a href="/retrain">trained</a> before analysis can be performed.</p>
+}
+@if (testResults is not null)
+{
+    <TelerikTileLayout Columns="4"
+                       Reorderable="true"
+                       Resizable="true"
+                       RowHeight=".5fr"
+                       OnResize="@ItemResize">
+        <TileLayoutItems>
+            
+
+            <TileLayoutItem HeaderText="MAE">
+                <Content>
+                    <LargeMetricDisplay Value="@testResults.RegressionMetrics.MeanAbsoluteError.ToString("#.##")"
+                                        Title="Mean Absolute Error" />
+                </Content>
+            </TileLayoutItem>
+            <TileLayoutItem HeaderText="MSE">
+                <Content>
+                    <LargeMetricDisplay Value="@testResults.RegressionMetrics.MeanSquaredError.ToString("#.##")"
+                                        Title="Mean Squared Error" />
+                </Content>
+            </TileLayoutItem>
+            <TileLayoutItem HeaderText="RMSE">
+                <Content>
+                    <LargeMetricDisplay Value="@testResults.RegressionMetrics.RootMeansSquaredError.ToString("#.##")"
+                                        Title="Root Mean Squared Error" />
+                </Content>
+            </TileLayoutItem>
+            <TileLayoutItem HeaderText="R Squared">
+                <Content>
+                    <RSquaredGauge RSquared="testResults.RegressionMetrics.RSquared" />
+                </Content>
+            </TileLayoutItem>
+
+            <TileLayoutItem HeaderText="Linear Regression" ColSpan="2" RowSpan="2">
+                <Content>
+                    <RegressionChart TestResults="testResults" />
+                </Content>
+            </TileLayoutItem>
+            <TileLayoutItem HeaderText="PFI" ColSpan="2" RowSpan="2">
+                <Content>
+                    <PermutationFeatureImportanceChart PermutationFeatureImportance="testResults.PermutationFeatureImportance" />
+                </Content>
+            </TileLayoutItem>
+
+        </TileLayoutItems>
+    </TelerikTileLayout>
+}
+
+
+
+@code {
+    TestDataResults? testResults;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Load();
+    }
+
+    private async Task Load()
+    {
+        string path = model.Settings.GetPath(model.Settings.AnalysisFileName);
+        if (System.IO.File.Exists(path))
+        {
+            string json = await System.IO.File.ReadAllTextAsync(path);
+            testResults = System.Text.Json.JsonSerializer.Deserialize<TestDataResults>(json, new JsonSerializerOptions(JsonSerializerDefaults.Web));
+        }
+    }
+    private void ItemResize()
+    {
+
+    }
+}

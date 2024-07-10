@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
-    <Content Remove="Components\Pages\Analysis\LinearRegressionChart.razor" />
+    <Content Remove="Components\Pages\DataAnalysis\LinearRegressionChart.razor" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="MLModel\Data\Input\taxi-fare-test.csv" />
@@ -15,7 +15,6 @@
     <PackageReference Include="Microsoft.ML" Version="3.0.1" />
     <PackageReference Include="Microsoft.ML.FastTree" Version="3.0.1" />
     <PackageReference Include="Microsoft.ML.LightGbm" Version="3.0.1" />
-    <PackageReference Include="Plotly.NET" Version="3.0.1" />
     <PackageReference Include="Telerik.Documents.Core" Version="2024.2.426" />
     <PackageReference Include="Telerik.Documents.Spreadsheet" Version="2024.2.426" />
     <PackageReference Include="Telerik.Documents.Spreadsheet.FormatProviders.OpenXml" Version="2024.2.426" />
@@ -27,6 +26,6 @@
     <Folder Include="MLModel\Data\TrainedModel\" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Components\Pages\Analysis\LinearRegressionChart.razor" />
+    <None Include="Components\Pages\DataAnalysis\LinearRegressionChart.razor" />
   </ItemGroup>
 </Project>

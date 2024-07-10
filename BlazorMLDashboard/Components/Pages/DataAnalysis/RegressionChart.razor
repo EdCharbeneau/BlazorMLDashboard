@@ -1,0 +1,34 @@
+﻿@using static BlazorMLDashboard.MLModel
+<h3>Linear Regression</h3>
+
+@if (TestResults is null)
+{
+    <p>Loading message</p>
+}
+else
+{
+    <TelerikChart Width="600px" Height="600px">
+        <ChartSeriesItems>
+            <ChartSeries Type="ChartSeriesType.ScatterLine" Data="@MSE"
+                         XField="@nameof(DataPoint.X)"
+                         YField="@nameof(DataPoint.Y)"
+                         Name="Minimized Square Error" />
+            <ChartSeries Type="ChartSeriesType.Scatter"
+                         Data="@TestResults.ResultSet"
+                         XField="@nameof(TestDataPoint.Actual)"
+                         YField="@nameof(TestDataPoint.Predicted)">
+                <ChartSeriesMarkers Type="ChartSeriesMarkersType.Cross" Size="3"></ChartSeriesMarkers>
+            </ChartSeries>
+            <ChartLegend Position="Telerik.Blazor.ChartLegendPosition.Bottom" />
+        </ChartSeriesItems>
+    </TelerikChart>
+}
+
+@code {
+    [Parameter]
+    public TestDataResults? TestResults { get; set; }
+
+    private IEnumerable<DataPoint>? MSE => TestResults?.MinimizedSquareError;
+
+    private IEnumerable<TestDataPoint>? ResultSet => TestResults?.ResultSet;
+}

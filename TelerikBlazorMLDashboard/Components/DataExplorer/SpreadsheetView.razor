@@ -1,0 +1,33 @@
+﻿@using System.Text
+@using Telerik.Documents.Common
+@using Telerik.Documents.SpreadsheetStreaming
+@using Telerik.Windows.Documents.Spreadsheet.FormatProviders.OpenXml.Xlsx
+@using Telerik.Windows.Documents.Spreadsheet.FormatProviders.TextBased.Csv
+@using Telerik.Windows.Documents.Spreadsheet.Model
+
+<p>@message</p>
+<TelerikSpreadsheet Data="xls" />
+
+@code {
+
+    [Parameter, EditorRequired]
+    public Workbook? Workbook { get; set; }
+
+    byte[]? xls;
+    string message = "Previewing the first 1000 records";
+
+    protected override void OnInitialized()
+    {
+        ConvertWorkbookToXls();
+    }
+
+    void ConvertWorkbookToXls()
+    {
+        using (MemoryStream xlsxStream = new MemoryStream())
+        {
+            new XlsxFormatProvider().Export(Workbook, xlsxStream);
+            xls = xlsxStream.ToArray();
+        };
+    }
+
+}

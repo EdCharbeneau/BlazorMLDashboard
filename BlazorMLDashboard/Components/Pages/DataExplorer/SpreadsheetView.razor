@@ -11,32 +11,23 @@
 @code {
 
     [Parameter, EditorRequired]
-    public string? FilePath { get; set; }
+    public Workbook? Workbook { get; set; }
 
     byte[]? xls;
     string message = "Previewing the first 1000 records";
 
     protected override void OnInitialized()
     {
-        Workbook wb = GetWorkbookPreviewFromCsv();
-        ConvertWorkbookToXls(wb);
+        ConvertWorkbookToXls();
     }
 
-    void ConvertWorkbookToXls(Workbook wb)
+    void ConvertWorkbookToXls()
     {
         using (MemoryStream xlsxStream = new MemoryStream())
         {
-            new XlsxFormatProvider().Export(wb, xlsxStream);
+            new XlsxFormatProvider().Export(Workbook, xlsxStream);
             xls = xlsxStream.ToArray();
         };
     }
 
-    private Workbook GetWorkbookPreviewFromCsv()
-    {
-        if (FilePath is null) throw new InvalidOperationException("FilePath parameter must be set.");
-
-        var dataString = System.IO.File.ReadLines(FilePath).Take(1000);
-        byte[] data = Encoding.UTF8.GetBytes(string.Join(Environment.NewLine, dataString));
-        return new CsvFormatProvider().Import(new MemoryStream(data));
-    }
 }

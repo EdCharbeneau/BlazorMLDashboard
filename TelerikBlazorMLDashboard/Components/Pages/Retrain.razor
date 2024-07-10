@@ -1,0 +1,102 @@
+﻿@page "/retrain"
+@using BlazorMLDashboard
+@using Microsoft.Extensions.Options
+@using System.Text
+@using Telerik.Windows.Documents.Spreadsheet.FormatProviders.TextBased.Csv
+@using Telerik.Windows.Documents.Spreadsheet.Model
+@using TelerikBlazorMLDashboard.Components.DataExplorer
+@inject MLModel model
+
+<PageTitle>Retrain</PageTitle>
+
+<h3>Retrain</h3>
+<TelerikToolBar>
+    <ToolBarButton OnClick=@(()=>OpenPreviewWindow(model.Settings.RetrainFileName))>
+        Preview Traning Data
+    </ToolBarButton>
+    <ToolBarButton OnClick=@(()=>OpenPreviewWindow(model.Settings.EvaluationFileName))>
+        Preview Evaluation Data
+    </ToolBarButton>
+    <ToolBarTemplateItem>
+        <span class="badge-zone">
+
+            @if (model.IsModelCreated)
+            {
+                <TelerikButton ThemeColor="primary" OnClick="TrainModel">
+                    Retrain Model
+                </TelerikButton>
+                <TelerikBadge ThemeColor="@(ThemeConstants.Badge.ThemeColor.Success)"
+                              VerticalAlign="@BadgeVerticalAlign.Top"
+                              Position="@BadgePosition.Edge"
+                              HorizontalAlign="@BadgeHorizontalAlign.End"
+                              Size="sm">
+                    Trained
+                </TelerikBadge>
+            }
+            else
+            {
+                <TelerikButton ThemeColor="primary" OnClick="TrainModel">
+                    Train Model
+                </TelerikButton>
+                <TelerikBadge ThemeColor="error"
+                              VerticalAlign="@BadgeVerticalAlign.Top"
+                              Position="@BadgePosition.Edge"
+                              HorizontalAlign="@BadgeHorizontalAlign.End"
+                              Size="sm">
+                    Not Created
+                </TelerikBadge>
+            }
+        </span>
+    </ToolBarTemplateItem>
+</TelerikToolBar>
+<p>Training Data: @model.Settings.RetrainFileName</p>
+<p>Validation Data: @model.Settings.EvaluationFileName</p>
+<p>Model: @model.Settings.ModelFileName</p>
+
+<TelerikWindow Centered="true" @bind-Visible=@windowVisible Size="@ThemeConstants.Window.Size.Medium" Modal="true">
+    <WindowTitle>
+        <strong>Previewing: @windowTitle</strong>
+    </WindowTitle>
+    <WindowActions>
+        <WindowAction Name="Close" />
+    </WindowActions>
+    <WindowContent>
+        <SpreadsheetView Workbook="@previewWorkbook" />
+    </WindowContent>
+</TelerikWindow>
+<TelerikLoaderContainer Visible="@isLoading"></TelerikLoaderContainer>
+@code {
+    #region Preview Window State
+    private bool windowVisible;
+    private string windowTitle = "";
+    private Workbook? previewWorkbook;
+    #endregion
+    private bool isLoading;
+
+    async Task OpenPreviewWindow(string path)
+    {
+        isLoading = true;
+        string previewFilePath = model.Settings.GetPath(path);
+        previewWorkbook = await GetWorkbookPreviewFromCsv(previewFilePath);
+        windowTitle = path;
+        windowVisible = true;
+        isLoading = false;
+    }
+
+    private async Task TrainModel()
+    {
+        isLoading = true;
+        await Task.Run(() => model.Train()); ;
+        isLoading = false;
+        //TODO: Add toast notification when completed
+    }
+
+    Task<Workbook> GetWorkbookPreviewFromCsv(string filePath) =>
+        Task.Run(() =>
+            {
+                if (filePath is null) throw new InvalidOperationException("FilePath parameter must be set.");
+                var dataString = System.IO.File.ReadLines(filePath).Take(1000);
+                byte[] data = Encoding.UTF8.GetBytes(string.Join(Environment.NewLine, dataString));
+                return new CsvFormatProvider().Import(new MemoryStream(data));
+            });
+}

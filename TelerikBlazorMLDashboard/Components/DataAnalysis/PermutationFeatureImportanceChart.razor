@@ -1,0 +1,23 @@
+﻿@using BlazorMLDashboard
+@using Microsoft.ML.Data
+
+<TelerikChart>
+    <ChartSeriesItems>
+        <ChartTitle>Top 5 Features</ChartTitle>
+        <ChartSeries Type="ChartSeriesType.Bar"
+                     Data="Top5"
+                     Field="@nameof(RegressionMetrics.RSquared)" />
+        <ChartCategoryAxes>
+            <ChartCategoryAxis Categories="@(Top5FeatureNames)" />
+        </ChartCategoryAxes>
+    </ChartSeriesItems>
+</TelerikChart>
+
+@code {
+    [Parameter]
+    public List<MLModel.RegressionMetrics>? PermutationFeatureImportance { get; set; }
+
+    private IEnumerable<MLModel.RegressionMetrics>? Top5 => PermutationFeatureImportance?.Take(5);
+
+    private string?[]? Top5FeatureNames => Top5?.Select(pfi => pfi.Feature).ToArray();
+}

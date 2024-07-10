@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.11.34909.67
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorMLDashboard", "BlazorMLDashboard\BlazorMLDashboard.csproj", "{A12775C3-0D61-4DBD-B623-E55481ACC038}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TelerikBlazorMLDashboard", "TelerikBlazorMLDashboard\TelerikBlazorMLDashboard.csproj", "{F6A4A59F-1ACC-4C9E-98C3-1FE9E3574870}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +11,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{A12775C3-0D61-4DBD-B623-E55481ACC038}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A12775C3-0D61-4DBD-B623-E55481ACC038}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A12775C3-0D61-4DBD-B623-E55481ACC038}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A12775C3-0D61-4DBD-B623-E55481ACC038}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F6A4A59F-1ACC-4C9E-98C3-1FE9E3574870}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6A4A59F-1ACC-4C9E-98C3-1FE9E3574870}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6A4A59F-1ACC-4C9E-98C3-1FE9E3574870}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6A4A59F-1ACC-4C9E-98C3-1FE9E3574870}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

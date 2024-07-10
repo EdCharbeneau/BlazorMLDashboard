@@ -1,0 +1,20 @@
+﻿<TelerikArcGauge>
+    <ArcGaugeCenterLabel>
+        <Template>
+            <span class="value">
+                <strong>@($"{context.Pointers[0].Value:#.##}%")</strong>
+            </span>
+        </Template>
+    </ArcGaugeCenterLabel>
+    <ArcGaugeScales>
+        <ArcGaugeScale Min="0" Max="100" MinorUnit="1">
+        </ArcGaugeScale>
+    </ArcGaugeScales>
+    <ArcGaugePointers>
+        <ArcGaugePointer Value="@(RSquared * 100)"></ArcGaugePointer>
+    </ArcGaugePointers>
+</TelerikArcGauge>
+@code {
+    [Parameter]
+    public double RSquared { get; set; }
+}

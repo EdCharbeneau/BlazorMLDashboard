@@ -1,0 +1,8 @@
+﻿.value {
+    display:block;
+    font-size: calc(var(--kendo-font-size-xl, 2em) * 4);
+}
+.title {
+    display: block;
+    font-size: var(--kendo-font-size-lg, .5em);
+}
