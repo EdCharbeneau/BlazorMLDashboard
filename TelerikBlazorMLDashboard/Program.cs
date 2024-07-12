@@ -1,4 +1,4 @@
-using BlazorMLDashboard;
+using TelerikBlazorMLDashboard;
 using TelerikBlazorMLDashboard.Components;
 
 var builder = WebApplication.CreateBuilder(args);

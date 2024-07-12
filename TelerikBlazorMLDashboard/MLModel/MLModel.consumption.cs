@@ -1,7 +1,7 @@
 ﻿using Microsoft.ML;
 using Microsoft.ML.Data;
 using System.ComponentModel.DataAnnotations;
-namespace BlazorMLDashboard;
+namespace TelerikBlazorMLDashboard;
 public partial class MLModel
 {
     /// <summary>

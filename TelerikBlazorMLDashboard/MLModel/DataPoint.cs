@@ -1,4 +1,4 @@
-﻿namespace BlazorMLDashboard;
+﻿namespace TelerikBlazorMLDashboard;
 public partial class MLModel
 {
     public class DataPoint

@@ -1,12 +1,11 @@
-﻿@using BlazorMLDashboard
-@using Microsoft.ML.Data
+﻿@using Microsoft.ML.Data
 
 <TelerikChart>
     <ChartSeriesItems>
         <ChartTitle>Top 5 Features</ChartTitle>
         <ChartSeries Type="ChartSeriesType.Bar"
                      Data="Top5"
-                     Field="@nameof(RegressionMetrics.RSquared)" />
+                     Field="RSquared)" />
         <ChartCategoryAxes>
             <ChartCategoryAxis Categories="@(Top5FeatureNames)" />
         </ChartCategoryAxes>

@@ -1,4 +1,4 @@
-﻿namespace BlazorMLDashboard;
+﻿namespace TelerikBlazorMLDashboard;
 public class ModelSettings
 {
     public required string RetrainFileName { get; set; }

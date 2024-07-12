@@ -1,7 +1,7 @@
 ﻿using Microsoft.ML;
 using System.Text.Json;
 
-namespace BlazorMLDashboard;
+namespace TelerikBlazorMLDashboard;
 
 public partial class MLModel
 {

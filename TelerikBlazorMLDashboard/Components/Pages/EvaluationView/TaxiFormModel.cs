@@ -1,4 +1,4 @@
-﻿using BlazorMLDashboard;
+﻿using TelerikBlazorMLDashboard;
 using Microsoft.ML.Data;
 using System.ComponentModel.DataAnnotations;
 

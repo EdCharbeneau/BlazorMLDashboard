@@ -5,7 +5,7 @@ using Microsoft.ML;
 using Microsoft.ML.Trainers.LightGbm;
 using Microsoft.ML.Transforms;
 
-namespace BlazorMLDashboard;
+namespace TelerikBlazorMLDashboard;
 public partial class MLModel
 {
 

@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using Microsoft.ML;
 
-namespace BlazorMLDashboard;
+namespace TelerikBlazorMLDashboard;
 
 public partial class MLModel(IOptions<ModelSettings> options)
 {

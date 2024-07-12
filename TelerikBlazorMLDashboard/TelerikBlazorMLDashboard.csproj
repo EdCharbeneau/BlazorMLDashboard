@@ -7,10 +7,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Content Remove="Components\DataAnalysis\LinearRegressionChart.razor" />
-	</ItemGroup>
-
-	<ItemGroup>
 	  <Content Include="MLModel\Data\Input\taxi-fare-test.csv" />
 	  <Content Include="MLModel\Data\Input\taxi-fare-train.csv" />
 	</ItemGroup>
