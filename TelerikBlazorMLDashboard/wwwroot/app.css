@@ -20,7 +20,10 @@ body {
         }
 
 }
-
+.k-appbar {
+    /* override overflow behavior. Causes issue with full height layout */
+    overflow: inherit;
+}
 span.badge-zone {
     position: relative;
     overflow: visible;
